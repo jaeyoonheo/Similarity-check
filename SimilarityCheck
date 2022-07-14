@@ -1,0 +1,118 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Iterator;
+
+public class SimilarityCheck {
+	
+	public static void main(String[] args) {
+		Scanner sc = new Scanner(System.in);
+		ArrayList<String> al = new ArrayList<String>();
+		Set<String> fstSet = new HashSet<>();
+		Set<String> sndSet = new HashSet<>();
+		HashMap<String, Integer> fstMap = new HashMap<String, Integer>();
+		HashMap<String, Integer> sndMap = new HashMap<String, Integer>();  
+		System.out.print("입력 파일 이름? ");
+		String fname1 = sc.next();	// 파일 이름을 입력
+		String fname2 = sc.next();
+		System.out.print("Shingle의 수 : ");
+	    int shingle = sc.nextInt();
+
+		sc.close();
+		try {
+			sc = new Scanner(new File(fname1));
+			int count = 1, ent=0, ret=0;
+			while (sc.hasNext()) {
+				String word = sc.next();
+				al.add(word);
+			}
+			
+			String shin = null;
+			
+			for(int i = 0; i+shingle<=al.size(); i++) {
+				for(int j = 0; j<shingle; j++) {
+					shin = shin + " " + al.get(i+j);
+				}
+				fstSet.add(shin);
+				shin = null;
+			}
+			
+			for(int i = 0; i+shingle<=al.size(); i++) {
+				for(int j = 0; j<shingle; j++) {
+					shin = shin + " " + al.get(i+j);
+				}
+				if(fstMap.containsKey(shin)) {
+					count = fstMap.get(shin);
+					fstMap.put(shin,count+1);
+				}
+				else fstMap.put(shin, 1);
+				shin = null;
+				ent++;
+			}
+			
+			sc = new Scanner(new File(fname2));
+			al = new ArrayList<String>();
+			
+			while (sc.hasNext()) {
+				String word = sc.next();
+				al.add(word);
+			}
+			
+			shin = null;
+			
+			for(int i = 0; i+shingle<=al.size(); i++) {
+				for(int j = 0; j<shingle; j++) {
+					shin = shin + " " + al.get(i+j);
+				}
+				sndSet.add(shin);
+				shin = null;
+			}
+			
+			for(int i = 0; i+shingle<=al.size(); i++) {
+				for(int j = 0; j<shingle; j++) {
+					shin = shin + " " + al.get(i+j);
+				}
+				if(sndMap.containsKey(shin)) {
+					count = sndMap.get(shin);
+					sndMap.put(shin,count+1);
+				}
+				else sndMap.put(shin, 1);
+				shin = null;
+				ent++;
+			}
+			
+			Set<String> union = new HashSet<String>(fstSet);
+			union.addAll(sndSet);
+			Set<String> intersection = new HashSet<String>(fstSet);
+			intersection.retainAll(sndSet);
+			
+			System.out.print("문자열 집합을 이용한 유사도 = ");
+			double per = (double)intersection.size()/(double)union.size();
+			System.out.println(per);
+			
+			Set<String> keySet = sndMap.keySet();
+			Iterator<String> iter = keySet.iterator();
+			while(iter.hasNext()) {
+				String tmp = iter.next();
+				if(fstMap.containsKey(tmp)&&sndMap.containsKey(tmp)) {
+					if(fstMap.get(tmp)>sndMap.get(tmp)) {
+						ret+=sndMap.get(tmp);
+					}
+					else {
+						ret+=fstMap.get(tmp);
+					}
+				}
+			}
+			System.out.print("문자열 map을 이용한 유사도 = ");
+			per = (double)ret/(double)(ent-ret);
+			System.out.println(per);
+			
+		} catch (FileNotFoundException e) { e.printStackTrace(); }
+		if (sc != null)
+			sc.close();
+	}
+}
